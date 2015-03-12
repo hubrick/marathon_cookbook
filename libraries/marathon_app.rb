@@ -19,7 +19,9 @@
 # rubocop:disable Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
 def marathon_app(app = {}, marathon_host = 'http://localhost:8080', marathon_user = nil, marathon_pass = nil)
   fail Chef::Exceptions::AttributeNotFound, 'App ID required' unless app[:id]
-  fail Chef::Exceptions::AttributeNotFound, 'Command required' unless app[:command]
+  unless app[:command] || app[:container]
+    fail Chef::Exceptions::AttributeNotFound, 'Command or container required'
+  end
 
   # Ensure marathon_client gem installed
   marathon_client = Chef::Resource::ChefGem.new('marathon_client', run_context)
@@ -33,12 +35,13 @@ def marathon_app(app = {}, marathon_host = 'http://localhost:8080', marathon_use
   app_opts = {
     instances: app[:instances] || 1,
     uris: app[:uri] || [],
-    cmd: app[:command],
     env: app[:env] || {},
     cpus: app[:cpus] || 0.1,
     mem: app[:mem] || 10.0,
     constraints: (app[:constraint] || []).map { |c| c.split(':') },
   }
+  app_opts[:cmd] = app[:command] unless app[:command].nil?
+  app_opts[:container] = app[:container] unless app[:container].nil?
   app_opts[:executor] = app[:executor] unless app[:executor].nil?
   app_opts[:ports] = app[:ports] unless app[:ports].nil?
 
