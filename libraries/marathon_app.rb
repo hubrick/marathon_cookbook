@@ -25,7 +25,7 @@ def marathon_app(app = {}, marathon_host = 'http://localhost:8080', marathon_use
 
   # Ensure marathon_client gem installed
   marathon_client = Chef::Resource::ChefGem.new('marathon_client', run_context)
-  marathon_client.version = '0.2.3'
+  marathon_client.version '0.2.3'
   marathon_client.run_action(:install)
 
   require 'marathon'
