@@ -25,7 +25,7 @@ def marathon_app(app = {}, marathon_host = 'http://localhost:8080', marathon_use
 
   # Ensure marathon_client gem installed
   marathon_client = Chef::Resource::ChefGem.new('marathon_client', run_context)
-  marathon_client.version '0.2.3'
+  marathon_client.source "#{Chef::Config[:file_cache_path]}/marathon_client-0.3.0.gem"
   marathon_client.run_action(:install)
 
   require 'marathon'
@@ -48,26 +48,27 @@ def marathon_app(app = {}, marathon_host = 'http://localhost:8080', marathon_use
   res = marathon.list
   if res.success?
     res.parsed_response.each do |running|
-      if running['id'] == app[:id]
-        if running['cpus'] != app_opts[:cpus] || running['mem'] != app_opts[:mem] || \
-        running['cmd'] != app_opts[:cmd]
-          Chef::Log.info("Marathon: resource allocation or cmd changed, stopping #{app[:id]}")
-          res = marathon.stop(app[:id])
-          Chef::Log.info(res)
-          Chef::Log.info("Marathon: starting app '#{app[:id]}'")
-          res = marathon.start(app[:id], app_opts)
-          Chef::Log.info(res)
-          return
-        end
-        if running['instances'] != app_opts[:instances]
-          Chef::Log.info("Need to scale #{app['id']} to #{app_opts[:instances]}")
-          res = marathon.scale(app[:id], app_opts[:instances])
-          Chef::Log.info(res)
-          return
-        end
-        Chef::Log.info("#{app[:id]} already running with #{app_opts['instances']} instances")
-        return
-      end
+Chef::Log.info(running)
+#      if running['id'] == app[:id]
+#        if running['cpus'] != app_opts[:cpus] || running['mem'] != app_opts[:mem] || \
+#        running['cmd'] != app_opts[:cmd]
+#          Chef::Log.info("Marathon: resource allocation or cmd changed, stopping #{app[:id]}")
+#          res = marathon.stop(app[:id])
+#          Chef::Log.info(res)
+#          Chef::Log.info("Marathon: starting app '#{app[:id]}'")
+#          res = marathon.start(app[:id], app_opts)
+#          Chef::Log.info(res)
+#          return
+#        end
+#        if running['instances'] != app_opts[:instances]
+#          Chef::Log.info("Need to scale #{app['id']} to #{app_opts[:instances]}")
+#          res = marathon.scale(app[:id], app_opts[:instances])
+#          Chef::Log.info(res)
+#          return
+#        end
+#        Chef::Log.info("#{app[:id]} already running with #{app_opts['instances']} instances")
+#        return
+#      end
     end
   end
 
